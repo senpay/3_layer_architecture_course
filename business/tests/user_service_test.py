@@ -6,17 +6,20 @@ from business.user_service import UserService
 
 class UserServiceTest(unittest.TestCase):
 
-    def test_should_be_able_to_create_and_retrieve_user(self):
-        user_service = UserService()
+    def setUp(self):
+        self._user_service = UserService()
 
+
+    def test_should_be_able_to_create_and_retrieve_user(self):
         user = User(
             user_name='test_user',
             first_name='Test',
             last_name='User'
         )
 
-        user_id = user_service.create(user)
-        retrieved_user = user_service.get(user_id)
+        user_id = self._user_service.create(user)
+
+        retrieved_user = self._user_service.get(user_id)
 
         self.assertIsNotNone(user_id)
         self.assertIsNotNone(retrieved_user)
@@ -27,13 +30,10 @@ class UserServiceTest(unittest.TestCase):
         self.assertEqual(retrieved_user.user_id, user_id)
 
     def test_get_should_handle_none_user_id(self):
-        user_service = UserService()
-
         with self.assertRaises(UserNotFoundException):
-            user_service.get(None)
+            self._user_service.get(None)
 
     def test_create_should_not_allow_empty_user_name(self):
-        user_service = UserService()
 
         user = User(
             user_name=None,
@@ -42,10 +42,9 @@ class UserServiceTest(unittest.TestCase):
         )
 
         with self.assertRaises(InvalidUserException):
-            user_service.create(user)
+            self._user_service.create(user)
 
     def test_create_should_not_allow_empty_string_user_name(self):
-        user_service = UserService()
 
         user = User(
             user_name='',
@@ -54,10 +53,9 @@ class UserServiceTest(unittest.TestCase):
         )
 
         with self.assertRaises(InvalidUserException):
-            user_service.create(user)
+            self._user_service.create(user)
 
     def test_create_should_not_allow_empty_string_first_name(self):
-        user_service = UserService()
 
         user = User(
             user_name='user_name',
@@ -66,10 +64,9 @@ class UserServiceTest(unittest.TestCase):
         )
 
         with self.assertRaises(InvalidUserException):
-            user_service.create(user)
+            self._user_service.create(user)
 
     def test_create_should_not_allow_empty_first_name(self):
-        user_service = UserService()
 
         user = User(
             user_name='user_name',
@@ -78,10 +75,9 @@ class UserServiceTest(unittest.TestCase):
         )
 
         with self.assertRaises(InvalidUserException):
-            user_service.create(user)
+            self._user_service.create(user)
 
     def test_create_should_not_allow_non_unique_user_name(self):
-        user_service = UserService()
 
         user1 = User(
             user_name='user_name',
@@ -95,13 +91,12 @@ class UserServiceTest(unittest.TestCase):
             last_name='User1'
         )
 
-        user_service.create(user1)
+        user_id = self._user_service.create(user1)
 
         with self.assertRaises(InvalidUserException):
-            user_service.create(user2)
+            self._user_service.create(user2)
 
     def test_should_be_able_to_delete_user(self):
-        user_service = UserService()
 
         user = User(
             user_name='test_user',
@@ -109,50 +104,45 @@ class UserServiceTest(unittest.TestCase):
             last_name='User'
         )
 
-        user_id = user_service.create(user)
-        user_service.delete(user_id)
+        user_id = self._user_service.create(user)
+
+        self._user_service.delete(user_id)
 
         with self.assertRaises(UserNotFoundException):
-            user_service.get(user_id)
+            self._user_service.get(user_id)
 
     def test_delete_should_handle_none_user_id(self):
-        user_service = UserService()
 
         with self.assertRaises(UserNotFoundException):
-            user_service.delete(None)
+            self._user_service.delete(None)
 
     def test_delete_should_handle_incorrect_user_id(self):
         incorrect_id = 12356
-        user_service = UserService()
 
         with self.assertRaises(UserNotFoundException):
-            user_service.delete(incorrect_id)
+            self._user_service.delete(incorrect_id)
 
     def test_should_be_able_to_update_user(self):
-        user_service = UserService()
-
         user = User(
             user_name='test_user',
             first_name='Test',
             last_name='User'
         )
 
-        user_id = user_service.create(user)
+        user_id = self._user_service.create(user)
 
         user.user_id = user_id
         user.first_name = 'Test1'
         user.last_name = 'User1'
 
-        user_service.update(user)
+        self._user_service.update(user)
 
-        retrieved_user = user_service.get(user_id)
+        retrieved_user = self._user_service.get(user_id)
 
         self.assertEqual(user.first_name, retrieved_user.first_name)
         self.assertEqual(user.last_name, retrieved_user.last_name)
 
     def test_update_should_handle_none_user_id(self):
-        user_service = UserService()
-
         user = User(
             user_name='test_user',
             first_name='Test',
@@ -160,10 +150,9 @@ class UserServiceTest(unittest.TestCase):
         )
 
         with self.assertRaises(UserNotFoundException):
-            user_service.update(user)
+            self._user_service.update(user)
 
     def test_update_should_handle_incorrect_user_id(self):
-        user_service = UserService()
 
         user = User(
             user_name='test_user',
@@ -174,7 +163,7 @@ class UserServiceTest(unittest.TestCase):
         user.user_id = 12345
 
         with self.assertRaises(UserNotFoundException):
-            user_service.update(user)
+            self._user_service.update(user)
 
         
             

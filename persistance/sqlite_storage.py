@@ -5,7 +5,7 @@ from persistance.storage import UserStorage
 
 class SqliteStorage(UserStorage):
 
-    DB_FILE = 'users.db'
+    DB_FILE = ':memory:'
     CREATE_TABLE_STATEMENT = 'CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, user_name TEXT, first_name TEXT, last_name TEXT, role INTEGER)'
 
     GET_USER_STATEMENT = 'SELECT * FROM users WHERE user_id = ?'
@@ -13,6 +13,10 @@ class SqliteStorage(UserStorage):
     ADD_USER_STATEMENT = 'INSERT INTO users (user_name, first_name, last_name, role) VALUES (?, ?, ?, ?)'
 
     FIND_USER_STATEMENT = 'SELECT * FROM users WHERE user_name = ?'
+
+    DELETE_USER_STATEMENT = 'DELETE FROM users WHERE user_id = ?'
+
+    UPDATE_USER_STATEMENT = 'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, role = ? WHERE user_id = ?'
 
     def __init__(self):
         self._connection = sqlite3.connect(self.DB_FILE)
@@ -49,6 +53,18 @@ class SqliteStorage(UserStorage):
         if row is None:
             return None
         return self._row_to_user(row)
+    
+    def delete(self, user_id):
+        cursor = self._connection.cursor()
+        cursor.execute(self.DELETE_USER_STATEMENT, (user_id,))
+        cursor.close()
+        self._connection.commit()
+
+    def update(self, user):
+        cursor = self._connection.cursor()
+        cursor.execute(self.UPDATE_USER_STATEMENT, (user.user_name, user.first_name, user.last_name, user.role, user.user_id))
+        cursor.close()
+        self._connection.commit()
         
 
     def _row_to_user(self, row):
