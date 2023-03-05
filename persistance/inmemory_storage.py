@@ -10,7 +10,7 @@ class InMemoryStorage(UserStorage):
             return None
         return self._data[user_id]
 
-    def save(self, user):
+    def add(self, user):
         user_id = len(self._data)
         user.user_id = user_id
         self._data.append(user)

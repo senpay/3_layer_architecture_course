@@ -62,3 +62,6 @@ instance/
 .webassets-cache
 
 .vscode
+
+# created database files
+*.db
