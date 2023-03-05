@@ -19,3 +19,13 @@ class UserService:
         if user is None:
             raise UserNotFoundException()
         return user
+    
+    def update(self, user: User):
+        if (not self.get(user.user_id)):
+            raise UserNotFoundException()
+        self._user_storage.update(user)
+
+    def delete(self, user_id: int):
+        if (not self.get(user_id)):
+            raise UserNotFoundException()
+        self._user_storage.delete(user_id)

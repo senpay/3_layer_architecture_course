@@ -99,6 +99,84 @@ class UserServiceTest(unittest.TestCase):
 
         with self.assertRaises(InvalidUserException):
             user_service.create(user2)
+
+    def test_should_be_able_to_delete_user(self):
+        user_service = UserService()
+
+        user = User(
+            user_name='test_user',
+            first_name='Test',
+            last_name='User'
+        )
+
+        user_id = user_service.create(user)
+        user_service.delete(user_id)
+
+        with self.assertRaises(UserNotFoundException):
+            user_service.get(user_id)
+
+    def test_delete_should_handle_none_user_id(self):
+        user_service = UserService()
+
+        with self.assertRaises(UserNotFoundException):
+            user_service.delete(None)
+
+    def test_delete_should_handle_incorrect_user_id(self):
+        incorrect_id = 12356
+        user_service = UserService()
+
+        with self.assertRaises(UserNotFoundException):
+            user_service.delete(incorrect_id)
+
+    def test_should_be_able_to_update_user(self):
+        user_service = UserService()
+
+        user = User(
+            user_name='test_user',
+            first_name='Test',
+            last_name='User'
+        )
+
+        user_id = user_service.create(user)
+
+        user.user_id = user_id
+        user.first_name = 'Test1'
+        user.last_name = 'User1'
+
+        user_service.update(user)
+
+        retrieved_user = user_service.get(user_id)
+
+        self.assertEqual(user.first_name, retrieved_user.first_name)
+        self.assertEqual(user.last_name, retrieved_user.last_name)
+
+    def test_update_should_handle_none_user_id(self):
+        user_service = UserService()
+
+        user = User(
+            user_name='test_user',
+            first_name='Test',
+            last_name='User'
+        )
+
+        with self.assertRaises(UserNotFoundException):
+            user_service.update(user)
+
+    def test_update_should_handle_incorrect_user_id(self):
+        user_service = UserService()
+
+        user = User(
+            user_name='test_user',
+            first_name='Test',
+            last_name='User'
+        )
+
+        user.user_id = 12345
+
+        with self.assertRaises(UserNotFoundException):
+            user_service.update(user)
+
+        
             
 if __name__ == '__main__':
     unittest.main()
