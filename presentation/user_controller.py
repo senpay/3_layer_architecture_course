@@ -21,6 +21,11 @@ class UserController:
         user = self.user_service.get(user_id_int)
         return user.__dict__
 
+    # Really simple authentication controller
+    def authenticate(self, incoming_data):
+        user = self.user_service.authenticate(incoming_data.get('user_name', None))
+        return user.__dict__
+
 def fault_safe_to_int(user_id):
     try:
         return int(user_id)

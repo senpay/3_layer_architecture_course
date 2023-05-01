@@ -15,7 +15,6 @@ def hello_world():
 @app.route("/user", methods = ['POST'])
 def user():
     incoming_data = request.get_json(force=True)
-    print(incoming_data)
     try:
         user_data = user_controller.create_user(incoming_data)
     except InvalidUserException:
@@ -28,6 +27,16 @@ def get_user(user_id):
         user_data = user_controller.get_user(user_id)
     except UserNotFoundException:
         return jsonify({"message": "User not found", "user_id": user_id}), 404
+    return jsonify(user_data)
+
+
+@app.route("/authenticate", methods = ['POST'])
+def authenticate():
+    try:
+        incoming_data = request.get_json(force=True)
+        user_data = user_controller.authenticate(incoming_data)
+    except UserNotFoundException:
+        return jsonify({"message": "User not found"}), 404
     return jsonify(user_data)
     
 

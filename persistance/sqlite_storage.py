@@ -19,7 +19,12 @@ class SqliteStorage(UserStorage):
     UPDATE_USER_STATEMENT = 'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, role = ? WHERE user_id = ?'
 
     def __init__(self):
-        self._connection = sqlite3.connect(self.DB_FILE)
+        if sqlite3.threadsafety == 3:
+            check_same_thread = False
+        else:
+            check_same_thread = True
+
+        self._connection = sqlite3.connect(self.DB_FILE, check_same_thread=check_same_thread)
         cursor = self._connection.cursor()
         cursor.execute(self.CREATE_TABLE_STATEMENT)
         cursor.close()
@@ -72,6 +77,7 @@ class SqliteStorage(UserStorage):
         user.user_id = row[0]
         user.role = row[4]
         return user
+
 
 
     
