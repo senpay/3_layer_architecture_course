@@ -29,3 +29,9 @@ class InMemoryStorage(UserStorage):
             if user.user_name == user_name:
                 return user
         return None
+    
+    def find_by_token(self, token):
+        for user in self._data:
+            if user.auth_token == token:
+                return user
+        return None

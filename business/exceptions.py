@@ -3,3 +3,6 @@ class UserNotFoundException(Exception):
 
 class InvalidUserException(Exception):
     pass
+
+class Unauthorized(Exception):
+    pass

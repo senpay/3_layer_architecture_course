@@ -17,3 +17,6 @@ class UserStorage:
 
     def find_by_user_name(self, user_name: str) -> User:
         raise NotImplementedError()
+    
+    def find_by_token(self, token: str) -> User:
+        raise NotImplementedError()

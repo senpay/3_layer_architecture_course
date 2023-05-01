@@ -6,17 +6,19 @@ from persistance.storage import UserStorage
 class SqliteStorage(UserStorage):
 
     DB_FILE = ':memory:'
-    CREATE_TABLE_STATEMENT = 'CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, user_name TEXT, first_name TEXT, last_name TEXT, role INTEGER)'
+    CREATE_TABLE_STATEMENT = 'CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, user_name TEXT, first_name TEXT, last_name TEXT, role INTEGER, auth_token TEXT)'
 
     GET_USER_STATEMENT = 'SELECT * FROM users WHERE user_id = ?'
 
     ADD_USER_STATEMENT = 'INSERT INTO users (user_name, first_name, last_name, role) VALUES (?, ?, ?, ?)'
 
     FIND_USER_STATEMENT = 'SELECT * FROM users WHERE user_name = ?'
+    
+    FIND_USER_BY_TOKEN_STATEMENT = 'SELECT * FROM users WHERE auth_token = ?'
 
     DELETE_USER_STATEMENT = 'DELETE FROM users WHERE user_id = ?'
 
-    UPDATE_USER_STATEMENT = 'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, role = ? WHERE user_id = ?'
+    UPDATE_USER_STATEMENT = 'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, role = ?, token = ? WHERE user_id = ?'
 
     def __init__(self):
         if sqlite3.threadsafety == 3:
@@ -59,6 +61,17 @@ class SqliteStorage(UserStorage):
             return None
         return self._row_to_user(row)
     
+
+    def find_by_token(self, token: str) -> User:
+        cursor = self._connection.cursor()
+        cursor.execute(self.FIND_USER_STATEMENT, (token,))
+        row = cursor.fetchone()
+        cursor.close()
+        self._connection.commit()
+        if row is None:
+            return None
+        return self._row_to_user(row)
+    
     def delete(self, user_id):
         cursor = self._connection.cursor()
         cursor.execute(self.DELETE_USER_STATEMENT, (user_id,))
@@ -67,7 +80,7 @@ class SqliteStorage(UserStorage):
 
     def update(self, user):
         cursor = self._connection.cursor()
-        cursor.execute(self.UPDATE_USER_STATEMENT, (user.user_name, user.first_name, user.last_name, user.role, user.user_id))
+        cursor.execute(self.UPDATE_USER_STATEMENT, (user.user_name, user.first_name, user.last_name, user.role, user.auth_token, user.user_id))
         cursor.close()
         self._connection.commit()
         
