@@ -31,3 +31,19 @@ class UserService:
         if (not self.get(user_id)):
             raise UserNotFoundException()
         self._user_storage.delete(user_id)
+
+    
+    ## Authentication functionality implementation
+    def authenticate(self, user_name: str) -> User:
+        user = self._user_storage.find_by_user_name(user_name)
+        if user is None:
+            raise UserNotFoundException()
+        
+        if user.auth_token == None:
+            user.auth_token = self.__generate_token() 
+            self._user_storage.update(user)
+
+        return user
+    
+    def __generate_token(self):
+        return '1234567890'

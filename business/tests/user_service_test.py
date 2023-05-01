@@ -165,7 +165,35 @@ class UserServiceTest(unittest.TestCase):
         with self.assertRaises(UserNotFoundException):
             self._user_service.update(user)
 
+
+    # Authentication endpoint implementation
+    def test_should_provide_auth_token_for_valid_user(self):
+        # Create a user
+        user = User(
+            user_name='test_user',
+            first_name='Test',
+            last_name='User'
+        )
+
+        self._user_service.create(user)
+
+        # Authenticate the user
+        retrieved_user = self._user_service.authenticate(user.user_name)
+
+        # Assert that the user has an auth token and correct data
+        self.assertIsNotNone(retrieved_user)
+
+        self.assertIsNotNone(retrieved_user.auth_token)
+
+        self.assertEqual(user.user_name, retrieved_user.user_name)
+        self.assertEqual(user.first_name, retrieved_user.first_name)
+        self.assertEqual(user.last_name, retrieved_user.last_name)
+    
+
+
+
         
+
             
 if __name__ == '__main__':
     unittest.main()
