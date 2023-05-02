@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from business.exceptions import InvalidUserException, UserNotFoundException
+from business.exceptions import InvalidUserException, Unauthorized, UserNotFoundException
 
 from business.user_service import UserService
 from presentation.user_controller import UserController
@@ -21,12 +21,17 @@ def user():
         return jsonify({"message": "Invalid user data"}), 400
     return jsonify(user_data)
 
+# Now updated to enforce authentication
 @app.route("/user/<user_id>")
 def get_user(user_id):
     try:
-        user_data = user_controller.get_user(user_id)
+        authorization_header = request.headers.get('Authorization')
+        user_data = user_controller.get_user(user_id,
+                                             authorization_header)
     except UserNotFoundException:
         return jsonify({"message": "User not found", "user_id": user_id}), 404
+    except Unauthorized as exc:
+        return jsonify({"message": str(exc)}), 403
     return jsonify(user_data)
 
 
