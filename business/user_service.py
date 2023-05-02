@@ -22,28 +22,31 @@ class UserService:
         return self._user_storage.add(user)
     
     def get(self, user_id: int, token = None) -> User:
-        if token == None:
-            raise Unauthorized('Token is required')
-        
-        auth_user = self.authenticate_user(token)
-        if auth_user == None:
-            raise Unauthorized('Invalid token')
-        
-        if auth_user.user_id != user_id and auth_user.role != ADMIN:
-            raise Unauthorized('You can\'t access this user\'s data')
+        self._authorization_verification(user_id, token)
 
         user = self._user_storage.get(user_id)
         if user is None:
             raise UserNotFoundException()
         return user
     
+    def _authorization_verification(self, user_id: int, token = None):
+        if token == None:
+            raise Unauthorized('Token is required')
+        
+        auth_user = self._authenticate_user(token)
+        if auth_user == None:
+            raise Unauthorized('Invalid token')
+        
+        if auth_user.user_id != user_id and auth_user.role != ADMIN:
+            raise Unauthorized('You can\'t access this user\'s data')
+    
     def update(self, user: User, token = None):
-        if (not self.get(user.user_id)):
+        if (not self.get(user.user_id, token)):
             raise UserNotFoundException()
         self._user_storage.update(user)
 
     def delete(self, user_id: int, token = None):
-        if (not self.get(user_id)):
+        if (not self.get(user_id, token)):
             raise UserNotFoundException()
         self._user_storage.delete(user_id)
 
@@ -60,7 +63,7 @@ class UserService:
 
         return user
     
-    def authenticate_user(self, token: str) -> User:
+    def _authenticate_user(self, token: str) -> User:
         return self._user_storage.find_by_token(token)
     
     def __generate_token(self):
