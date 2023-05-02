@@ -3,14 +3,18 @@ from business.model.role import ADMIN
 from business.model.user import User
 from business.user_validator import UserValidator
 from persistance.inmemory_storage import InMemoryStorage
-from persistance.sqlite_storage import SqliteStorage
 
 class UserService:
     
-    def __init__(self):
-        # self._user_storage = InMemoryStorage()
-        self._user_storage = SqliteStorage()
+    def __init__(self, user_storage = None):
+        if user_storage is None:
+            self._user_storage = InMemoryStorage()
+        else:
+            self._user_storage = user_storage
+
         self._user_validator = UserValidator(self._user_storage)
+
+    
     
     def create(self, user: User) -> int:
         if (not self._user_validator.validate(user)):

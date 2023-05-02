@@ -18,7 +18,9 @@ class SqliteStorage(UserStorage):
 
     DELETE_USER_STATEMENT = 'DELETE FROM users WHERE user_id = ?'
 
-    UPDATE_USER_STATEMENT = 'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, role = ?, token = ? WHERE user_id = ?'
+    UPDATE_USER_STATEMENT = 'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, role = ?, auth_token = ? WHERE user_id = ?'
+
+    CLEAN_DB_STATEMENT = 'DELETE FROM users where 1=1'
 
     def __init__(self):
         if sqlite3.threadsafety == 3:
@@ -64,7 +66,7 @@ class SqliteStorage(UserStorage):
 
     def find_by_token(self, token: str) -> User:
         cursor = self._connection.cursor()
-        cursor.execute(self.FIND_USER_STATEMENT, (token,))
+        cursor.execute(self.FIND_USER_BY_TOKEN_STATEMENT, (token,))
         row = cursor.fetchone()
         cursor.close()
         self._connection.commit()
@@ -81,6 +83,12 @@ class SqliteStorage(UserStorage):
     def update(self, user):
         cursor = self._connection.cursor()
         cursor.execute(self.UPDATE_USER_STATEMENT, (user.user_name, user.first_name, user.last_name, user.role, user.auth_token, user.user_id))
+        cursor.close()
+        self._connection.commit()
+
+    def clean(self):
+        cursor = self._connection.cursor()
+        cursor.execute(self.CLEAN_DB_STATEMENT)
         cursor.close()
         self._connection.commit()
         

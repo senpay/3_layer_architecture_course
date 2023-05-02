@@ -1,14 +1,19 @@
 import unittest
-from business.exceptions import InvalidUserException, UserNotFoundException
+from business.exceptions import InvalidUserException, Unauthorized, UserNotFoundException
 from business.model.user import User
 
 from business.user_service import UserService
+from persistance.sqlite_storage import SqliteStorage
 
 class UserServiceTest(unittest.TestCase):
 
     def setUp(self):
-        self._user_service = UserService()
+        self._user_storage = SqliteStorage()
+        self._user_service = UserService(self._user_storage)
 
+    
+    def tearDown(self) -> None:
+        self._user_storage.clean()
 
     def test_should_be_able_to_create_and_retrieve_user(self):
         user = User(
@@ -19,7 +24,9 @@ class UserServiceTest(unittest.TestCase):
 
         user_id = self._user_service.create(user)
 
-        retrieved_user = self._user_service.get(user_id)
+        user_auth_token = self._user_service.authenticate(user.user_name).auth_token
+
+        retrieved_user = self._user_service.get(user_id, user_auth_token)
 
         self.assertIsNotNone(user_id)
         self.assertIsNotNone(retrieved_user)
@@ -30,11 +37,12 @@ class UserServiceTest(unittest.TestCase):
         self.assertEqual(retrieved_user.user_id, user_id)
 
     def test_get_should_handle_none_user_id(self):
-        with self.assertRaises(UserNotFoundException):
+        # We always check that authorized user can access
+        # only their own data, unless it is ADMIN
+        with self.assertRaises(Unauthorized):
             self._user_service.get(None)
 
     def test_create_should_not_allow_empty_user_name(self):
-
         user = User(
             user_name=None,
             first_name='Test',
@@ -112,7 +120,6 @@ class UserServiceTest(unittest.TestCase):
             self._user_service.get(user_id)
 
     def test_delete_should_handle_none_user_id(self):
-
         with self.assertRaises(UserNotFoundException):
             self._user_service.delete(None)
 
